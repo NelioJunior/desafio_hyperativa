@@ -154,7 +154,7 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Resposta de Sucesso:**
     ```json
     {
-        "message": "Cards added successfully from file"
+        "message": "Cartoes adicionados com sucesso"
     }
     ```
 - **Código de Resposta:** `201 Created`
