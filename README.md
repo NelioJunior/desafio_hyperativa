@@ -4,11 +4,11 @@
 
 ## Nota do desenvolvedor 
 
-    Este projeto foi criado utilizando LLM como chatgpt e Gemini.
-    
-    Utilizei estas ferramentas, em um projeto de avaliação, porque acredito que são fabulosas ferramentas para desenvolvimento de sistemas.
+Este projeto foi criado utilizando LLM como chatgpt e Gemini.
 
-    O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém crucial para definir estratégias, escrever prompts eficazes, resolver problemas com criatividade, organizar diretórios e arquivos,realizar testes garantindo a qualidade do aplicativo e   por fim deployments e manipulação de repositórios Git.
+Utilizei estas ferramentas, em um projeto de avaliação, porque acredito que são fabulosas ferramentas para desenvolvimento de sistemas.
+
+O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém crucial para definir estratégias, escrever prompts eficazes, resolver problemas com criatividade, organizar diretórios e arquivos,realizar testes garantindo a qualidade do aplicativo e   por fim deployments e manipulação de repositórios Git.
 
 1. Clone o repositório:
     ```bash
