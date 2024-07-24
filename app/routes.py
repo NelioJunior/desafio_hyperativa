@@ -67,3 +67,17 @@ def add_cards_from_custom_file():
     db.session.commit()
     logging.info(f"User {current_user.username} added cards from custom file")
     return jsonify({'message': 'Cards added successfully from custom file'}), 201
+
+@main.route('/users', methods=['GET'])
+@jwt_required()
+def get_users():
+    users = User.query.all()
+    user_list = [{"id": user.id, "username": user.username} for user in users]
+    return jsonify(user_list), 200
+
+@main.route('/cards', methods=['GET'])
+@jwt_required()
+def get_cards():
+    cards = CreditCard.query.all()
+    card_list = [{"id": card.id, "card_number": card.card_number, "user_id": card.user_id} for card in cards]
+    return jsonify(card_list), 200

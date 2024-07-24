@@ -20,37 +20,39 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
     cd credit_card_api
     ```
 
-2. Crie e ative um ambiente virtual:
+2. Coloque o arquivo `DESAFIO-HYPERATIVA.txt` no diretório raiz do projeto.
+
+3. Crie e ative um ambiente virtual:
     ```bash
-    python3 -m venv env
-    source env/bin/activate
+    python3 -m venv venv
+    source venv/bin/activate
     ```
 
-3. Instale as dependências:
+4. Instale as dependências:
     ```bash
     pip install -r requirements.txt
     ```
 
-4. Configure as variáveis de ambiente no arquivo `.env`:
+5. Configure as variáveis de ambiente no arquivo `.env`:
     ```plaintext
-    SECRET_KEY= Entre com sua senha 
-    DATABASE_URL = sqlite:///app.db
-    JWT_SECRET_KEY =  Entre com sua senha JWT 
+    SECRET_KEY=your_secret_key
+    DATABASE_URL=sqlite:///app.db
+    JWT_SECRET_KEY=your_jwt_secret_key
     ```
 
-5. Inicialize o banco de dados:
+6. Inicialize o banco de dados:
     ```bash
     flask db init
     flask db migrate -m "Initial migration."
     flask db upgrade
     ```
 
-6. Execute a aplicação:
+7. Execute a aplicação:
     ```bash
     flask run
     ```
 
-7. A aplicação estará disponível em `http://127.0.0.1:5000`.
+8. A aplicação estará disponível em `http://127.0.0.1:5000`.
 
 ## Endpoints da API
 
@@ -60,11 +62,8 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Método:** `POST`
 - **Descrição:** Registra um novo usuário.
 - **Exemplo de Requisição:**
-    ```json
-    {
-        "username": "user",
-        "password": "senha"
-    }
+    ```bash
+    curl -X POST http://127.0.0.1:5000/register -H "Content-Type: application/json" -d '{"username": "testuser", "password": "password"}'
     ```
 - **Resposta de Sucesso:**
     ```json
@@ -82,16 +81,13 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Método:** `POST`
 - **Descrição:** Faz login e retorna um token JWT.
 - **Exemplo de Requisição:**
-    ```json
-    {
-        "username": "usuario tester",
-        "password": "senha"
-    }
+    ```bash
+    TOKEN=$(curl -X POST http://127.0.0.1:5000/login -H "Content-Type: application/json" -d '{"username": "testuser", "password": "password"}' | jq -r .access_token)
     ```
 - **Resposta de Sucesso:**
     ```json
     {
-        "access_token": "jwt_token"
+        "access_token": "seu_token_jwt_aqui"
     }
     ```
 - **Código de Resposta:** `200 OK`
@@ -105,10 +101,8 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Descrição:** Adiciona um novo número de cartão.
 - **Requer Autenticação:** Sim (Bearer Token)
 - **Exemplo de Requisição:**
-    ```json
-    {
-        "card_number": "1234567812345678"
-    }
+    ```bash
+    curl -X POST http://127.0.0.1:5000/add_card -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"card_number": "1234567812345678"}'
     ```
 - **Resposta de Sucesso:**
     ```json
@@ -145,16 +139,19 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Descrição:** Adiciona números de cartão a partir de um arquivo TXT.
 - **Requer Autenticação:** Sim (Bearer Token)
 - **Exemplo de Requisição:**
-    - utilizando o arquivo `DESAFIO-HYPERATIVA.txt` 
+    - Enviar um arquivo `cards.txt` com o seguinte conteúdo:
         ```
-    - Executar no terminal `curl`:
+        1234567812345678
+        8765432187654321
+        ```
+    - Usando `curl`:
         ```bash
-        curl -X POST -H "Authorization: Bearer <jwt_token>" -F "file=@DESAFIO-HYPERATIVA.txt" http://127.0.0.1:5000/add_cards_from_file
+        curl -X POST -H "Authorization: Bearer $TOKEN" -F "file=@cards.txt" http://127.0.0.1:5000/add_cards_from_file
         ```
 - **Resposta de Sucesso:**
     ```json
     {
-        "message": "Cartoes adicionados com sucesso"
+        "message": "Cartões adicionados com sucesso a partir do arquivo"
     }
     ```
 - **Código de Resposta:** `201 Created`
@@ -165,18 +162,70 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Método:** `POST`
 - **Descrição:** Adiciona números de cartão a partir de um arquivo TXT no formato personalizado.
 - **Requer Autenticação:** Sim (Bearer Token)
-
-    - Usando `curl`:
+- **Exemplo de Requisição:**
+    - Enviar um arquivo `DESAFIO-HYPERATIVA.txt`
+        ```
+    - Executar pelo terminal `curl`:
         ```bash
-        curl -X POST -H "Authorization: Bearer <jwt_token>" -F "file=@DESAFIO-HYPERATIVA.txt" http://127.0.0.1:5000/add_cards_from_custom_file
+        curl -X POST -H "Authorization: Bearer $TOKEN" -F "file=@DESAFIO-HYPERATIVA.txt" http://127.0.0.1:5000/add_cards_from_custom_file
         ```
 - **Resposta de Sucesso:**
     ```json
     {
-        "message": "Cards added successfully from custom file"
+        "message": "Cartões adicionados com sucesso a partir do arquivo personalizado"
     }
     ```
 - **Código de Resposta:** `201 Created`
+
+### Listar Usuários
+
+- **URL:** `/users`
+- **Método:** `GET`
+- **Descrição:** Lista todos os usuários registrados.
+- **Requer Autenticação:** Sim (Bearer Token)
+- **Exemplo de Requisição:**
+    - Usando `curl`:
+        ```bash
+        curl -X GET http://127.0.0.1:5000/users -H "Authorization: Bearer $TOKEN"
+        ```
+- **Resposta de Sucesso:**
+    ```json
+    [
+        {
+            "id": 1,
+            "username": "testuser"
+        }
+    ]
+    ```
+- **Código de Resposta:** `200 OK`
+
+### Listar Cartões
+
+- **URL:** `/cards`
+- **Método:** `GET`
+- **Descrição:** Lista todos os cartões registrados.
+- **Requer Autenticação:** Sim (Bearer Token)
+- **Exemplo de Requisição:**
+    - Usando `curl`:
+        ```bash
+        curl -X GET http://127.0.0.1:5000/cards -H "Authorization: Bearer $TOKEN"
+        ```
+- **Resposta de Sucesso:**
+    ```json
+    [
+        {
+            "id": 1,
+            "card_number": "1234567812345678",
+            "user_id": 1
+        },
+        {
+            "id": 2,
+            "card_number": "8765432187654321",
+            "user_id": 1
+        }
+    ]
+    ```
+- **Código de Resposta:** `200 OK`
 
 ## Executar Testes
 
