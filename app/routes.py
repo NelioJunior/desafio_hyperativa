@@ -1,54 +1,69 @@
-import unittest
-from app import create_app, db
-from app.models import User, CreditCard
-from flask_jwt_extended import create_access_token
-import io
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from .models import CreditCard, User
+from . import db
+import logging
 
-class RoutesTestCase(unittest.TestCase):
-    def setUp(self):
-        self.app = create_app()
-        self.app.config['TESTING'] = True
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        self.client = self.app.test_client()
-        with self.app.app_context():
-            db.create_all()
-            user = User(username='testuser')
-            user.set_password('password')
-            db.session.add(user)
-            db.session.commit()
-            self.access_token = create_access_token(identity='testuser')
+main = Blueprint('main', __name__)
+logging.basicConfig(level=logging.INFO)
 
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
+@main.route('/add_card', methods=['POST'])
+@jwt_required()
+def add_card():
+    data = request.get_json()
+    card_number = data.get('card_number')
+    current_user = User.query.filter_by(username=get_jwt_identity()).first()
 
-    def test_add_card(self):
-        response = self.client.post('/add_card', json={
-            'card_number': '1234567812345678'
-        }, headers={
-            'Authorization': f'Bearer {self.access_token}'
-        })
-        self.assertEqual(response.status_code, 201)
+    if CreditCard.query.filter_by(card_number=card_number).first():
+        return jsonify({'message': 'Card already exists'}), 400
 
-    def test_check_card(self):
-        card = CreditCard(card_number='1234567812345678', user_id=1)
-        with self.app.app_context():
-            db.session.add(card)
-            db.session.commit()
-        response = self.client.get('/check_card/1234567812345678', headers={
-            'Authorization': f'Bearer {self.access_token}'
-        })
-        self.assertEqual(response.status_code, 200)
+    new_card = CreditCard(card_number=card_number, user=current_user)
+    db.session.add(new_card)
+    db.session.commit()
 
-    def test_add_cards_from_file(self):
-        data = {
-            'file': (io.BytesIO(b"1234567812345678\n8765432187654321"), 'cards.txt')
-        }
-        response = self.client.post('/add_cards_from_file', content_type='multipart/form-data', headers={
-            'Authorization': f'Bearer {self.access_token}'
-        }, data=data)
-        self.assertEqual(response.status_code, 201)
+    logging.info(f"User {current_user.username} added card {card_number}")
+    return jsonify({'message': 'Card added successfully'}), 201
 
-if __name__ == '__main__':
-    unittest.main()
+@main.route('/check_card/<card_number>', methods=['GET'])
+@jwt_required()
+def check_card(card_number):
+    card = CreditCard.query.filter_by(card_number=card_number).first()
+    if card is None:
+        return jsonify({'message': 'Card not found'}), 404
+
+    logging.info(f"Card {card_number} found for user {card.user.username}")
+    return jsonify({'card_id': card.id}), 200
+
+@main.route('/add_cards_from_file', methods=['POST'])
+@jwt_required()
+def add_cards_from_file():
+    file = request.files['file']
+    current_user = User.query.filter_by(username=get_jwt_identity()).first()
+
+    for line in file:
+        card_number = line.strip()
+        if not CreditCard.query.filter_by(card_number=card_number).first():
+            new_card = CreditCard(card_number=card_number, user=current_user)
+            db.session.add(new_card)
+
+    db.session.commit()
+    logging.info(f"User {current_user.username} added cards from file")
+    return jsonify({'message': 'Cards added successfully from file'}), 201
+
+@main.route('/add_cards_from_custom_file', methods=['POST'])
+@jwt_required()
+def add_cards_from_custom_file():
+    file = request.files['file']
+    current_user = User.query.filter_by(username=get_jwt_identity()).first()
+
+    lines = file.readlines()
+    for line in lines[1:-1]:  # Ignorar a primeira e última linha (cabeçalho e rodapé)
+        if line.startswith(b'C'):
+            card_number = line[7:26].strip().decode('utf-8')
+            if not CreditCard.query.filter_by(card_number=card_number).first():
+                new_card = CreditCard(card_number=card_number, user=current_user)
+                db.session.add(new_card)
+
+    db.session.commit()
+    logging.info(f"User {current_user.username} added cards from custom file")
+    return jsonify({'message': 'Cards added successfully from custom file'}), 201

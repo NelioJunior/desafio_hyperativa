@@ -4,16 +4,20 @@
 
 ## Nota do desenvolvedor 
 
-Este projeto foi criado utilizando LLM como chatgpt e Gemini.
+Este projeto foi criado com o auxilio de ferramentas LLMs como chatgpt e Gemini.
 
 Utilizei estas ferramentas, em um projeto de avaliação, porque acredito que são fabulosas ferramentas para desenvolvimento de sistemas.
 
 O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém crucial para definir estratégias, escrever prompts eficazes, resolver problemas com criatividade, organizar diretórios e arquivos,realizar testes garantindo a qualidade do aplicativo e   por fim deployments e manipulação de repositórios Git.
 
+# Credit Card API
+
+## Setup Local
+
 1. Clone o repositório:
     ```bash
     git clone git@github.com:NelioJunior/desafio_hyperativa.git
-    cd desafio_hyperativa
+    cd credit_card_api
     ```
 
 2. Crie e ative um ambiente virtual:
@@ -29,9 +33,9 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 
 4. Configure as variáveis de ambiente no arquivo `.env`:
     ```plaintext
-    SECRET_KEY= Senha de Usuario 
-    DATABASE_URL=sqlite:///app.db
-    JWT_SECRET_KEY= Senha do JWT 
+    SECRET_KEY= Entre com sua senha 
+    DATABASE_URL = sqlite:///app.db
+    JWT_SECRET_KEY =  Entre com sua senha JWT 
     ```
 
 5. Inicialize o banco de dados:
@@ -58,14 +62,14 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Exemplo de Requisição:**
     ```json
     {
-        "username": "testuser",
-        "password": "password"
+        "username": "user",
+        "password": "senha"
     }
     ```
 - **Resposta de Sucesso:**
     ```json
     {
-        "message": "User created successfully"
+        "message": "Usuário criado com sucesso"
     }
     ```
 - **Código de Resposta:** `201 Created`
@@ -80,8 +84,8 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Exemplo de Requisição:**
     ```json
     {
-        "username": "testuser",
-        "password": "password"
+        "username": "usuario tester",
+        "password": "senha"
     }
     ```
 - **Resposta de Sucesso:**
@@ -109,7 +113,7 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Resposta de Sucesso:**
     ```json
     {
-        "message": "Card added successfully"
+        "message": "Cartão adicionado com sucesso"
     }
     ```
 - **Código de Resposta:** `201 Created`
@@ -141,19 +145,35 @@ O uso dessas ferramentas não desonera o papel do desenvolvedor, que se mantém 
 - **Descrição:** Adiciona números de cartão a partir de um arquivo TXT.
 - **Requer Autenticação:** Sim (Bearer Token)
 - **Exemplo de Requisição:**
-    - Enviar um arquivo `cards.txt` com o seguinte conteúdo:
+    - utilizando o arquivo `DESAFIO-HYPERATIVA.txt` 
         ```
-        1234567812345678
-        8765432187654321
-        ```
-    - Usando `curl`:
+    - Executar no terminal `curl`:
         ```bash
-        curl -X POST -H "Authorization: Bearer <jwt_token>" -F "file=@cards.txt" http://127.0.0.1:5000/add_cards_from_file
+        curl -X POST -H "Authorization: Bearer <jwt_token>" -F "file=@DESAFIO-HYPERATIVA.txt" http://127.0.0.1:5000/add_cards_from_file
         ```
 - **Resposta de Sucesso:**
     ```json
     {
         "message": "Cards added successfully from file"
+    }
+    ```
+- **Código de Resposta:** `201 Created`
+
+### Adicionar Números de Cartão a Partir de Arquivo Personalizado
+
+- **URL:** `/add_cards_from_custom_file`
+- **Método:** `POST`
+- **Descrição:** Adiciona números de cartão a partir de um arquivo TXT no formato personalizado.
+- **Requer Autenticação:** Sim (Bearer Token)
+
+    - Usando `curl`:
+        ```bash
+        curl -X POST -H "Authorization: Bearer <jwt_token>" -F "file=@DESAFIO-HYPERATIVA.txt" http://127.0.0.1:5000/add_cards_from_custom_file
+        ```
+- **Resposta de Sucesso:**
+    ```json
+    {
+        "message": "Cards added successfully from custom file"
     }
     ```
 - **Código de Resposta:** `201 Created`
